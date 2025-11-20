@@ -1,8 +1,8 @@
 package com.example.AIWorldBuilder;
 
-import com.example.AIWorldBuilder.controller.ControllerInterface;
-import com.example.AIWorldBuilder.controller.MainController;
-import com.example.AIWorldBuilder.view.MainWindow;
+import com.example.AIWorldBuilder.main.controller.ControllerInterface;
+import com.example.AIWorldBuilder.main.controller.MainController;
+import com.example.AIWorldBuilder.main.view.MainWindow;
 
 public class Main {
     public static void main(String[] args) {
