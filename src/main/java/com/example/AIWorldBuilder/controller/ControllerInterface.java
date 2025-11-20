@@ -11,6 +11,10 @@ public interface ControllerInterface {
     void onCreateStory(String storyTitle, String description);
     void onSettingsButtonClicked();
     void onMenuButtonClicked();
+    void onPreviousButtonClicked();
+    void onDeleteStory(String storyId);
+    void onStoryUpdated(Story story);
+    void onStorySettingsButtonClicked(Story story);
     List<Story> getStories();
     Path getStoryPath(String storyId);
     String getApiKey();

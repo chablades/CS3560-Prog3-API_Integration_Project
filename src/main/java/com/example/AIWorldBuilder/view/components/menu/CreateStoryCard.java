@@ -1,4 +1,4 @@
-package com.example.AIWorldBuilder.view.components;
+package com.example.AIWorldBuilder.view.components.menu;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -13,6 +13,8 @@ import com.example.AIWorldBuilder.controller.ControllerInterface;
 
 public class CreateStoryCard extends JPanel {
 
+    private static final int WIDTH = 220;
+    private static final int HEIGHT = 300;
     private static final int IMAGE_SIZE = 200;
     private static final int PADDING = 10;
 
@@ -25,7 +27,7 @@ public class CreateStoryCard extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(40,30,30));
         setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
-        setPreferredSize(new Dimension(IMAGE_SIZE + 2 * PADDING, IMAGE_SIZE + (2 * PADDING) + 100));
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         // Change cursor on hover
         setCursor(new Cursor(Cursor.HAND_CURSOR));

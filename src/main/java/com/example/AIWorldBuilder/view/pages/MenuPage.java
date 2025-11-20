@@ -3,8 +3,11 @@ package com.example.AIWorldBuilder.view.pages;
 import javax.swing.*;
 import java.awt.*;
 import com.example.AIWorldBuilder.controller.ControllerInterface;
-import com.example.AIWorldBuilder.view.components.*;
+import com.example.AIWorldBuilder.view.components.menu.CreateStoryCard;
+import com.example.AIWorldBuilder.view.components.menu.StoryCard;
 import com.example.AIWorldBuilder.view.layouts.*;
+import com.example.AIWorldBuilder.utils.*;
+import java.util.Optional;
 
 public class MenuPage extends JPanel {
     private ControllerInterface controller;
@@ -42,15 +45,7 @@ public class MenuPage extends JPanel {
         // TITLE IMAGE LABEL
         JLabel titleImageLabel = new JLabel();
         titleImageLabel.setHorizontalAlignment(JLabel.CENTER);
-        ImageIcon titleImage = null;
-        java.net.URL imgURL = getClass().getResource("/icons/title.png");
-
-        if (imgURL != null) {
-            titleImage = new ImageIcon(imgURL);
-        } else {
-            titleImage = new ImageIcon();
-            System.err.println("Warning: /icons/title.png not found.");
-        }
+        ImageIcon titleImage = ImageLoader.loadImage("/icons/title.png", TITLE_IMAGE_SIZE, 0, Optional.empty(), Optional.of("Title"));
         
         // Resize title image
         Image img = titleImage.getImage();
@@ -133,5 +128,8 @@ public class MenuPage extends JPanel {
         scrollPane.getViewport().setOpaque(false);
         add(scrollPane, BorderLayout.CENTER);
 
+        // Refresh the UI
+        revalidate();
+        repaint();
     }
 }

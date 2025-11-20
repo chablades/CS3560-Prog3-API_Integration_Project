@@ -2,30 +2,23 @@ package com.example.AIWorldBuilder.view.pages;
 
 import javax.swing.*;
 import java.awt.*;
+import com.example.AIWorldBuilder.controller.ControllerInterface;
+import com.example.AIWorldBuilder.model.Story;
 
-import com.example.AIWorldBuilder.controller.*;
-
-// SettingsPage class to display settings options
-public class SettingsPage extends JPanel {
-    
+public class StorySettingsPage extends JPanel {
     private ControllerInterface controller;
-    // Constructor
-    public SettingsPage(ControllerInterface controller) {
-        this.controller = controller;
+    private Story story;
 
-        // Base layout and styling
+    public StorySettingsPage(ControllerInterface controller, Story story) {
+        this.controller = controller;
+        this.story = story;
+
+        // Base layout
         setLayout(new BorderLayout());
         setBackground(new Color(10, 10, 10));
 
-        refresh();
-    }
-
-    public void refresh() {
-
-        removeAll();
-
         // HEADER
-        JLabel headerLabel = new JLabel("Settings");
+        JLabel headerLabel = new JLabel("Story Settings");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         headerLabel.setForeground(Color.WHITE);
         headerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -45,29 +38,29 @@ public class SettingsPage extends JPanel {
         scrollPane.getViewport().setOpaque(false);
         add(scrollPane, BorderLayout.CENTER);
 
-        // API KEY ROW
-        JPanel apiKeyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        apiKeyPanel.setBackground(new Color(10, 10, 10));
+        // TITLE ROW
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        titlePanel.setBackground(new Color(10, 10, 10));
+        JLabel titleLabel = new JLabel("Story Title: ");
+        titleLabel.setForeground(Color.WHITE);
+        JTextField titleField = new JTextField(30);
+        titleField.setText(story.getTitle());
+        titlePanel.add(titleLabel);
+        titlePanel.add(titleField);
+        contentPanel.add(titlePanel);
 
-        JLabel apiKeyLabel = new JLabel("API Key: ");
-        apiKeyLabel.setForeground(Color.WHITE);
-        JPasswordField apiKeyField = new JPasswordField(30);
-        apiKeyField.setText(controller.getApiKey());
-        apiKeyPanel.add(apiKeyLabel);
-        apiKeyPanel.add(apiKeyField);
-
-        JButton toggleVisibilityButton = new JButton("Show");
-        toggleVisibilityButton.addActionListener(e -> {
-            if (apiKeyField.getEchoChar() != (char) 0) {
-                apiKeyField.setEchoChar((char) 0);
-                toggleVisibilityButton.setText("Hide");
-            } else {
-                apiKeyField.setEchoChar('•');
-                toggleVisibilityButton.setText("Show");
-            }
-        });
-        apiKeyPanel.add(toggleVisibilityButton);
-        contentPanel.add(apiKeyPanel);
+        // DESCRIPTION PANEL
+        JPanel descriptionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        descriptionPanel.setBackground(new Color(10, 10, 10));
+        JLabel descriptionLabel = new JLabel("Story Description: ");
+        descriptionLabel.setForeground(Color.WHITE);
+        JTextArea descriptionArea = new JTextArea(5, 30);
+        descriptionArea.setText(story.getDescription());
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setWrapStyleWord(true);
+        descriptionPanel.add(descriptionLabel);
+        descriptionPanel.add(new JScrollPane(descriptionArea));
+        contentPanel.add(descriptionPanel);
 
         // BUTTON PANEL
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -84,8 +77,9 @@ public class SettingsPage extends JPanel {
         // SAVE BUTTON
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> {
-            String newApiKey = new String(apiKeyField.getPassword());
-            controller.onApiKeyUpdated(newApiKey);
+            story.setTitle(titleField.getText().trim());
+            story.setDescription(descriptionArea.getText().trim());
+            controller.onStoryUpdated(story);
             controller.onPreviousButtonClicked();
         });
         buttonPanel.add(saveButton);
@@ -95,4 +89,3 @@ public class SettingsPage extends JPanel {
         repaint();
     }
 }
-        

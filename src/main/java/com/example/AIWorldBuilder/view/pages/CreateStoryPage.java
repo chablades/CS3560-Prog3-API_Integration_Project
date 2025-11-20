@@ -3,7 +3,8 @@ package com.example.AIWorldBuilder.view.pages;
 import javax.swing.*;
 import java.awt.*;
 import com.example.AIWorldBuilder.controller.ControllerInterface;
-import com.example.AIWorldBuilder.view.components.*;
+import com.example.AIWorldBuilder.view.components.common.PlaceholderTextArea;
+import com.example.AIWorldBuilder.view.components.common.PlaceholderTextField;
 
 public class CreateStoryPage extends JPanel {
     private ControllerInterface controller;

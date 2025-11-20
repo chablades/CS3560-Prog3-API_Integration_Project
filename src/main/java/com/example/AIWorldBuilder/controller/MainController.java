@@ -5,12 +5,14 @@ import com.example.AIWorldBuilder.persistence.*;
 import com.example.AIWorldBuilder.model.Story;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Stack;
 
 public class MainController implements ControllerInterface {
 
     private ViewInterface view;
     private APIKeyManager apiKeyManager;
     private StoryManager storyManager;
+    private Stack<Page> navStack = new Stack<>();
     
     public MainController(ViewInterface view) {
         this.view = view;
@@ -22,10 +24,10 @@ public class MainController implements ControllerInterface {
     public void start() {
         if (!apiKeyManager.hasKey()) {
             System.out.println("No API Key found, showing API Key page.");
-            view.showApiKeyPage();
+            showPage(Page.API_KEY);
         } else {
             System.out.println("API Key found, showing Menu page.");
-            view.showMenuPage();
+            showPage(Page.MENU);
         }
     }
 
@@ -35,7 +37,7 @@ public class MainController implements ControllerInterface {
     }
 
     @Override public void onCreateStoryRequested() {
-        view.showCreateStoryPage();
+        showPage(Page.CREATE_STORY);
     }
     
     @Override
@@ -58,13 +60,51 @@ public class MainController implements ControllerInterface {
     // Function for settings button click
     @Override
     public void onSettingsButtonClicked() {
-        view.showSettingsPage();
+        showPage(Page.SETTINGS);
     }
 
     // Function for menu button click
     @Override
     public void onMenuButtonClicked() {
-        view.showMenuPage();
+        showPage(Page.MENU);
+    }
+
+    // Function for previous button click
+    @Override
+    public void onPreviousButtonClicked() {
+        if (navStack.size() > 1) {
+            // Remove current page
+            navStack.pop();
+
+            // Go back to the previous page
+            Page previousPage = navStack.peek();
+            view.showPage(previousPage, null);
+        }
+    }
+
+    // Function to delete a story
+    @Override
+    public void onDeleteStory(String storyId) {
+        boolean success = storyManager.deleteStory(storyId);
+        if (success) {
+            System.out.println("Deleted story with ID: " + storyId);
+            showPage(Page.MENU);
+        } else {
+            System.out.println("Failed to delete story with ID: " + storyId);
+        }
+    }
+
+    // Function to update a story
+    @Override
+    public void onStoryUpdated(Story story) {
+        storyManager.saveStory(story);
+        System.out.println("Updated story with ID: " + story.getStoryId());
+    }
+
+    // Function for story settings button click
+    @Override
+    public void onStorySettingsButtonClicked(Story story) {
+        showPage(Page.STORY_SETTINGS, story);
     }
 
     // Function to get stories
@@ -83,5 +123,20 @@ public class MainController implements ControllerInterface {
     @Override
     public String getApiKey() {
         return apiKeyManager.loadKey();
+    }
+
+    // Helper to show page and update current/previous page
+
+    private void showPage(Page page) {
+        showPage(page, null);
+    }
+
+    private void showPage(Page page, Object data) {
+
+        if (navStack.isEmpty() || navStack.peek() != page) {
+            navStack.push(page);
+        }
+
+        view.showPage(page, data);
     }
 }

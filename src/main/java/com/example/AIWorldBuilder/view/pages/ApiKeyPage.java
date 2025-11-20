@@ -3,7 +3,6 @@ package com.example.AIWorldBuilder.view.pages;
 import javax.swing.*;
 import java.awt.*;
 import com.example.AIWorldBuilder.controller.ControllerInterface;
-import com.example.AIWorldBuilder.view.components.*;
 
 public class ApiKeyPage extends JPanel {
     private ControllerInterface controller;

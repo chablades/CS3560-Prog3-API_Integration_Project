@@ -1,14 +1,14 @@
-package com.example.AIWorldBuilder.view.components;
+package com.example.AIWorldBuilder.view.components.common;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class PlaceholderTextArea extends JTextArea {
+public class PlaceholderTextField extends JTextField {
 
     private boolean showingPlaceholder = true;
     private String placeholder;
     
-    public PlaceholderTextArea(String placeholder) {
+    public PlaceholderTextField(String placeholder) {
         this.placeholder = placeholder;
         setText(placeholder);
         setForeground(Color.GRAY);
