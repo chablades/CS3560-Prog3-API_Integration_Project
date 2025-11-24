@@ -16,4 +16,8 @@ public class AppDataPath {
     public static Path getStoriesPath() {
         return BASE_DIR.resolve("stories");
     }
+
+    public static Path getChaptersPath(String storyId) {
+        return getStoriesPath().resolve(storyId).resolve("chapters");
+    }
 }
