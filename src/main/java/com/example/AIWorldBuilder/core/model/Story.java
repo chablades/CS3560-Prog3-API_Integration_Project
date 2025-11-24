@@ -52,5 +52,5 @@ public class Story {
 
     public List<String> getChapterIds() { return chapterIds; }
     public void addChapterId(String chapterId) { this.chapterIds.add(chapterId); }
-    public void removeChapterId(String chapterId) { this.chapterIds.remove(chapterId); }
+    public void removeChapterById(String chapterId) { this.chapterIds.remove(chapterId); }
 }

@@ -31,6 +31,11 @@ public class AppSettingsManager {
         return settings;
     }
 
+    // Get the saved API key
+    public String getApiKey() {
+        AppSettings settings = load();
+        return settings.apiKey;
+    }
     // Check if theres an api key saved
     public boolean hasApiKey() {
         AppSettings settings = load();

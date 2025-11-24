@@ -2,13 +2,16 @@ package com.example.AIWorldBuilder.main.controller;
 
 import com.example.AIWorldBuilder.core.model.*;
 import com.example.AIWorldBuilder.core.persistence.*;
-import com.example.AIWorldBuilder.main.view.ViewInterface;
+import com.example.AIWorldBuilder.editor.ui.EditorPage;
+import com.example.AIWorldBuilder.editor.ui.EditorViewInterface;
+import com.example.AIWorldBuilder.editor.controller.*;
+import com.example.AIWorldBuilder.main.ui.ViewInterface;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Stack;
 
-public class MainController implements ControllerInterface {
+public class MainController implements MainControllerInterface {
 
     private ViewInterface view;
     private AppSettingsManager appSettingsManager;
@@ -55,7 +58,8 @@ public class MainController implements ControllerInterface {
 
         Story story = new Story(storyId, storyTitle, description);
         storyManager.saveStory(story);
-
+        view.addStoryToMenu(story);
+        onOpenStoryEditor(story);
     }
 
     // Function for settings button click
@@ -83,12 +87,27 @@ public class MainController implements ControllerInterface {
         }
     }
 
+    // Function to select a story and open editor
+    @Override
+    public void onOpenStoryEditor(Story story) {
+        EditorViewInterface editorPage = new EditorPage(story);
+
+        EditorController editorController =
+            new EditorController(editorPage, story, this, storyManager, appSettingsManager);
+
+        editorPage.setController(editorController);
+        editorController.start();
+
+        view.setEditorPage((EditorPage) editorPage);
+        showPage(Page.EDITOR, null);
+    }
+
     // Function to delete a story
     @Override
     public void onDeleteStory(String storyId) {
         boolean success = storyManager.deleteStory(storyId);
         if (success) {
-            System.out.println("Deleted story with ID: " + storyId);
+            view.removeStoryById(storyId);
             showPage(Page.MENU);
         } else {
             System.out.println("Failed to delete story with ID: " + storyId);
@@ -100,6 +119,7 @@ public class MainController implements ControllerInterface {
     public void onStoryUpdated(Story story, StorySettings settings) {
         story.update(settings);
         storyManager.saveStory(story);
+        view.updateStoryCard(story);
         System.out.println("Updated story with ID: " + story.getStoryId());
     }
 
