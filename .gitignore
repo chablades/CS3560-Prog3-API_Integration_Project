@@ -1,0 +1,6 @@
+src/main/resources/config.properties
+target/
+.idea/
+*.iml
+.vscode/
+.DS_Store
