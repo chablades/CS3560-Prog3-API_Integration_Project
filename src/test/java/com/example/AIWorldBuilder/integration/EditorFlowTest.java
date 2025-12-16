@@ -57,8 +57,8 @@ public class EditorFlowTest {
     }
 
     private static class FakeView implements EditorViewInterface {
-        String chapterText = "";
         boolean refreshCalled = false;
+        String chapterText = "";
 
         @Override
         public void setController(EditorControllerInterface controller) {}
@@ -73,10 +73,25 @@ public class EditorFlowTest {
         public void setGenerating(boolean generating) {}
 
         @Override
+        public void openChapter(String chapterId) {}
+
+        @Override
+        public void exitChapter() {}
+
+        @Override
         public void appendToken(String token) { chapterText += token; }
 
         @Override
         public void showError(String message) {}
+
+        @Override
+        public void showMessage(String message) {}
+
+        @Override
+        public void setChatText(String text) {}
+
+        @Override
+        public String getChapterTitle() { return "Fake Title"; }
 
         @Override
         public String getChapterText() { return chapterText; }
@@ -93,6 +108,7 @@ public class EditorFlowTest {
         @Override public void onSettingsButtonClicked() {}
         @Override public void onMenuButtonClicked() {}
         @Override public void onPreviousButtonClicked() {}
+        @Override public void onCloseStoryEditor() {}
         @Override public void onOpenStoryEditor(Story story) {}
         @Override public void onDeleteStory(String storyId) {}
         @Override public void onStoryUpdated(Story story, StorySettings settings) {}

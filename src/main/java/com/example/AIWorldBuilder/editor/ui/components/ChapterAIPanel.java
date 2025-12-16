@@ -7,7 +7,9 @@ import com.example.AIWorldBuilder.common.ui.components.*;
 import javax.swing.*;
 import java.awt.*;
 
-public class AIChatPanel extends JPanel {
+import com.example.AIWorldBuilder.core.ai.PromptMode;
+
+public class ChapterAIPanel extends JPanel {
     private EditorControllerInterface controller;
     private Story story;
     private Chapter chapter;
@@ -20,7 +22,7 @@ public class AIChatPanel extends JPanel {
 
     private boolean generating = false;
 
-    public AIChatPanel(EditorControllerInterface controller) {
+    public ChapterAIPanel(EditorControllerInterface controller) {
         this.controller = controller;
         this.story = controller.getStory();
         this.chapter = controller.getCurrentChapter();
@@ -59,6 +61,7 @@ public class AIChatPanel extends JPanel {
         chatPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         chatPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         chatScrollPane = new JScrollPane(chatPanel);
+        chatScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         add(chatScrollPane, BorderLayout.CENTER);
 
         // Text area for chat messages (for demonstration purposes)
@@ -111,6 +114,7 @@ public class AIChatPanel extends JPanel {
         this.generating = generating;
         // Enable/disable chatArea
         chatArea.setEditable(!generating);
+        System.out.println("Set generating to: " + generating);
 
         if (generating) {
             chatArea.forceHidePlaceholder();
@@ -143,6 +147,11 @@ public class AIChatPanel extends JPanel {
     // Get prompt input text
     public String getPromptText() {
         return promptInput.getText();
+    }
+
+    // Set chatarea text
+    public void setChatText(String text) {
+        chatArea.setText(text);
     }
 
 }

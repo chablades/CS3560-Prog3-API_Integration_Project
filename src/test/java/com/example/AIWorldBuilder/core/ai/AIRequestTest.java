@@ -13,7 +13,6 @@ public class AIRequestTest {
                 AIRequestType.TEXT,
                 "key",
                 "Prompt",
-                "Context",
                 true
         );
 
@@ -21,7 +20,6 @@ public class AIRequestTest {
         assertEquals(AIRequestType.TEXT, req.getRequestType());
         assertEquals("key", req.getApiKey());
         assertEquals("Prompt", req.getPrompt());
-        assertEquals("Context", req.getContext());
         assertTrue(req.isStream());
     }
 }

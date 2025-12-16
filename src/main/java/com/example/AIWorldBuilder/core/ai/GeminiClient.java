@@ -10,7 +10,20 @@ import com.google.genai.types.Part;
 public class GeminiClient {
 
     private boolean initialized = false;
+    private static volatile GeminiClient instance = null;
     private Client client;
+
+    // Get singleton instance
+    public static GeminiClient getInstance() {
+        if (instance == null) {
+            synchronized (GeminiClient.class) {
+                if (instance == null) {
+                    instance = new GeminiClient();
+                }
+            }
+        }
+        return instance;
+    }
 
     // Send a request to the Gemini API
     public void sendRequest(AIRequest request, AIStreamListener listener) {
@@ -35,14 +48,14 @@ public class GeminiClient {
             return;
         }
         
-        String finalPrompt = buildPrompt(request);
+        String prompt = request.getPrompt();
 
         try {
             var model = "gemini-2.5-flash";
 
             // Start streaming response
             ResponseStream<GenerateContentResponse> stream =
-                client.models.generateContentStream(model, finalPrompt, null);
+                client.models.generateContentStream(model, prompt, null);
 
             for (GenerateContentResponse res : stream) {
                 String chunkText = res.text();
@@ -73,25 +86,5 @@ public class GeminiClient {
             return;
         }
     }
-
-    // Build the full prompt with context
-    private String buildPrompt(AIRequest request) {
-        StringBuilder promptBulder = new StringBuilder();
-        
-        // System message
-        promptBulder.append("SYSTEM: You are an AI assistant that helps users write creative stories. You will continue the story based on the user prompt and the last text of the story provided in the context. Be imaginative, listen to the user's input and style needs, and be engaging in your writing.");
-
-        // User prompt
-        promptBulder.append("\nUSER: " + request.getPrompt());
-
-        // Context message (if any)
-        promptBulder.append("\nPREVIOUS TEXT: " + request.getContext());
-        
-        // Final assistant prompt
-        promptBulder.append("\nCONTINUE THE STORY: ");
-
-        return promptBulder.toString();
-    }
-
 
 }

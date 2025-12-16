@@ -11,7 +11,7 @@ public class AIService {
     private Thread currentThread;
 
     public AIService() {
-        this.geminiClient = new GeminiClient();
+        this.geminiClient = GeminiClient.getInstance();
     }
 
     // Send a request to the AI provider (or simulate in test mode)

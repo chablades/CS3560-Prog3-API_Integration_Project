@@ -15,6 +15,7 @@ public interface MainControllerInterface {
     void onMenuButtonClicked();
     void onPreviousButtonClicked();
     void onOpenStoryEditor(Story story);
+    void onCloseStoryEditor();
     void onDeleteStory(String storyId);
     void onStoryUpdated(Story story, StorySettings settings);
     void onStorySettingsButtonClicked(Story story);

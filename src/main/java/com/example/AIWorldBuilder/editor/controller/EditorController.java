@@ -8,7 +8,14 @@ import com.example.AIWorldBuilder.core.model.*;
 
 import javax.swing.SwingUtilities;
 
+import org.checkerframework.checker.units.qual.m;
+
+import java.util.List;
+import java.util.ArrayList;
+
 import com.example.AIWorldBuilder.core.ai.*;
+import com.example.AIWorldBuilder.core.ai.strategy.*;
+import com.example.AIWorldBuilder.core.ai.factory.*;
 import com.example.AIWorldBuilder.core.service.AIService;
 import com.example.AIWorldBuilder.core.persistence.StoryManager;
 import com.example.AIWorldBuilder.core.persistence.AppSettingsManager;
@@ -18,10 +25,12 @@ public class EditorController implements EditorControllerInterface, AIStreamList
     private EditorViewInterface editorPage;
     private Story story;
     private Chapter currentChapter;
+    private List<Chapter> chapters;
     private MainControllerInterface mainController;
     private StoryManager storyManager;
     private AppSettingsManager appSettingsManager;
     private AIService aiService;
+    private PromptMode currentPromptMode = PromptMode.CONTINUE;
 
     private boolean dirty = false;
 
@@ -34,6 +43,7 @@ public class EditorController implements EditorControllerInterface, AIStreamList
         this.editorPage = editorPage;
         this.story = story;
         this.currentChapter = null;
+        this.chapters = null;
         this.mainController = mainController;
         this.storyManager = storyManager;
         this.appSettingsManager = appSettingsManager;
@@ -42,50 +52,55 @@ public class EditorController implements EditorControllerInterface, AIStreamList
 
     @Override
     public void start() {
+        this.chapters = cloneChapters(getChaptersFromPersistence());
+        this.currentChapter = null;
+        this.dirty = false;
+
         editorPage.setStory(story);
-
-        // Ensure chapters list exists
-        if (story.getChapterIds().isEmpty()) {
-            Chapter first = new Chapter(
-                "chapter1",
-                "Chapter 1",
-                ""
-            );
-
-            storyManager.addChapter(story, first);
-            storyManager.saveStory(story);
-        }
-
-        // Load first chapter
-        Chapter chapter = storyManager.loadChapter(
-            story.getStoryId(),
-            story.getChapterIds().get(0)
-        );
-        this.currentChapter = chapter;
         editorPage.refresh();
+    }
+
+    private List<Chapter> cloneChapters(List<Chapter> source) {
+        List<Chapter> copy = new ArrayList<>();
+        for (Chapter c : source) {
+            copy.add(new Chapter(
+                c.getChapterId(),
+                c.getTitle(),
+                c.getContent()
+            ));
+        }
+        return copy;
     }
 
     // Handle content generation request
     @Override
-    public void onGenerateContentRequest(String prompt) {
-        // Create context for AI request (only last 5000 characters or less of current chapter)
-        String context = "";
-        if (currentChapter != null && currentChapter.getContent() != null) {
-            String content = currentChapter.getContent();
-            if (content.length() > 5000) {
-                context = content.substring(content.length() - 5000);
-            } else {
-                context = content;
-            }
+    public void onGenerateContentRequest(String userPrompt) {
+
+        getChapterDataFromView();
+
+        PromptStrategy strategy =
+            PromptStrategyFactory.create(currentPromptMode);
+
+        String finalPrompt = strategy.buildPrompt(
+            userPrompt,
+            currentChapter.getContent()
+        );
+
+        System.out.println(finalPrompt);
+
+        // empty chat text area if prompt mode is REWRITE
+        if (currentPromptMode == PromptMode.REWRITE) {
+            editorPage.setChatText("");
         }
+
         AIRequest request = new AIRequest(
             AIProvider.GOOGLE,
             AIRequestType.TEXT,
             appSettingsManager.getApiKey(),
-            prompt,
-            context,
+            finalPrompt,
             true
         );
+
         editorPage.setGenerating(true);
         aiService.send(request, this);
     }
@@ -100,18 +115,90 @@ public class EditorController implements EditorControllerInterface, AIStreamList
     // Handle exit button click
     @Override
     public void onExitButtonClicked() {
-        mainController.onMenuButtonClicked();
+        mainController.onCloseStoryEditor();
     }
     // Handle save button click
     @Override
     public void onSaveButtonClicked() {
+        getChapterDataFromView();
+
+        // rebuild story chapter IDs from working copy
+        story.getChapterIds().clear();
+
+        for (Chapter chapter : chapters) {
+            story.addChapterId(chapter.getChapterId());
+            storyManager.saveChapter(story.getStoryId(), chapter);
+        }
+
         storyManager.saveStory(story);
-        String chapterText = editorPage.getChapterText();
-        currentChapter.setContent(chapterText);
-        storyManager.saveChapter(story.getStoryId(), currentChapter);
         dirty = false;
-        System.out.println("Story and chapter saved.");
+
+        // Show message to user
+        editorPage.showMessage("Story saved successfully.");
     }
+
+    // Handle chapter save button click
+    @Override
+    public void onChapterSaveButtonClicked() {
+        // update the currentChapter from chapters list
+        for (int i = 0; i < chapters.size(); i++) {
+            if (chapters.get(i).getChapterId().equals(currentChapter.getChapterId())) {
+                getChapterDataFromView();
+                chapters.set(i, currentChapter);
+                break;
+            }
+        }
+    }
+    // Handle chapter selection
+    @Override
+    public void onChapterSelect(String chapterId) {
+        for (Chapter chapter : chapters) {
+            if (chapter.getChapterId().equals(chapterId)) {
+                this.currentChapter = chapter;
+                editorPage.openChapter(chapterId);
+                break;
+            }
+        }
+    }
+
+    // Handle chapter delete button click
+    @Override
+    public void onChapterDeleteButtonClicked(String chapterId) {
+        deleteChapterById(chapterId);
+        editorPage.refresh();
+    }
+
+    private void getChapterDataFromView() {
+        if (currentChapter != null) {
+            String newTitle = editorPage.getChapterTitle();
+            String newContent = editorPage.getChapterText();
+            currentChapter.setTitle(newTitle);
+            currentChapter.setContent(newContent);
+        }
+    }
+    // Handle chapter exit button click
+    @Override
+    public void onChapterExitButtonClicked() {
+        this.currentChapter = null;
+        editorPage.exitChapter();
+        editorPage.refresh();
+    }
+
+    // handle chapter title change
+    @Override
+    public void onChapterTitleChanged(String newTitle) {
+        if (currentChapter != null) {
+            currentChapter.setTitle(newTitle);
+            dirty = true;
+        }
+    }
+    // Handle create chapter button click
+    @Override
+    public void onCreateChapterButtonClicked() {
+        createNewChapter("New Chapter " + (chapters.size() + 1));
+        editorPage.refresh();
+    }
+
     // Handle settings button click
     @Override
     public void onSettingsButtonClicked() {
@@ -177,17 +264,26 @@ public class EditorController implements EditorControllerInterface, AIStreamList
         }
         return null;
     }
-    // Get chapters of the story
+    // Get chapters of the story from persistence
     @Override
-    public java.util.List<Chapter> getChapters(Story story) {
-        java.util.List<Chapter> chapters = new java.util.ArrayList<>();
-        for (String chapterId : story.getChapterIds()) {
-            Chapter chapter = storyManager.loadChapter(story.getStoryId(), chapterId);
+    public List<Chapter> getChaptersFromPersistence() {
+        List<Chapter> chapters = new ArrayList<>();
+        for (String chapterId : this.story.getChapterIds()) {
+            Chapter chapter = storyManager.loadChapter(this.story.getStoryId(), chapterId);
             if (chapter != null) {
                 chapters.add(chapter);
             }
         }
         return chapters;
+    }
+
+    // Get chapters of the story
+    @Override
+    public List<Chapter> getChapters() {
+        if (this.chapters == null) {
+            this.chapters = getChaptersFromPersistence();
+        }
+        return this.chapters;
     }
 
     // Get the current story
@@ -202,12 +298,43 @@ public class EditorController implements EditorControllerInterface, AIStreamList
         this.story = story;
     }
 
+    // Set the current prompt strategy mode
+    @Override
+    public void setStrategyMode(PromptMode mode) {
+        this.currentPromptMode = mode;
+    }
+
     // Get the current chapter
     public Chapter getCurrentChapter() {
         return this.currentChapter;
     }
-        // Set the current chapter
+    // Set the current chapter
     public void setCurrentChapter(Chapter chapter) {
         this.currentChapter = chapter;
+    }
+
+    // Delete chapter by ID
+    @Override
+    public void deleteChapterById(String chapterId) {
+        chapters.removeIf(c -> c.getChapterId().equals(chapterId));
+
+        if (currentChapter != null &&
+            currentChapter.getChapterId().equals(chapterId)) {
+            currentChapter = null;
+            editorPage.exitChapter();
+        }
+
+        dirty = true;
+    }
+    // Create a new chapter
+    @Override
+    public Chapter createNewChapter(String title) {
+        String newChapterId = "chapter" + (chapters.size() + 1);
+        Chapter newChapter = new Chapter(newChapterId, title, "");
+
+        chapters.add(newChapter);
+        dirty = true;
+
+        return newChapter;
     }
 }

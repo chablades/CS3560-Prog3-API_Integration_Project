@@ -17,6 +17,7 @@ public class MainController implements MainControllerInterface {
     private AppSettingsManager appSettingsManager;
     private StoryManager storyManager;
     private Stack<Page> navStack = new Stack<>();
+    private EditorControllerInterface editorController;
     
     public MainController(ViewInterface view) {
         this.view = view;
@@ -92,7 +93,7 @@ public class MainController implements MainControllerInterface {
     public void onOpenStoryEditor(Story story) {
         EditorViewInterface editorPage = new EditorPage(story);
 
-        EditorController editorController =
+        editorController =
             new EditorController(editorPage, story, this, storyManager, appSettingsManager);
 
         editorPage.setController(editorController);
@@ -100,6 +101,12 @@ public class MainController implements MainControllerInterface {
 
         view.setEditorPage((EditorPage) editorPage);
         showPage(Page.EDITOR, null);
+    }
+
+    @Override
+    public void onCloseStoryEditor() {
+        showPage(Page.MENU);
+        editorController = null;
     }
 
     // Function to delete a story

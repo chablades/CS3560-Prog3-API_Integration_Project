@@ -17,7 +17,6 @@ public class AIServiceTest {
                 AIRequestType.TEXT,
                 "dummy-key",
                 "Test prompt",
-                "",
                 true
         );
         request.setTestMode(true);
