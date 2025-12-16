@@ -16,8 +16,20 @@ The project includes:
  - A full JUnit test suite
 
 ## Challenges & Fixes
+**Challenge:** Java Swing's JTextArea and JTextField doesn't support undo/redo nor placeholder texts by default
+- **Fix:** The PlaceholderTextArea and PlaceholderTextField classes were created, which implement those two functionalities so they can be reused throughout the program
 
+**Challenge:** MainController and Main View components would get bloated especially once the Story Editor is implemented
+- **Fix:** The GUI and controller aspect of the program was split into two parts: Main and Editor. They each have their own controller and main GUI, and they separate the concerns between the main menu and the editor window.
 
+**Challenge:** Given that this program requires an API key, we wanted to find a more user friendly way to store the API key in the user's local file structure without having to create config properties
+- **Fix:** Global settings are persisted and this includes the API key field, which can be edited through the app's interface
+
+**Challenge:** OpenAI's API was paid, which would get costly after testing numerous times
+- **Fix:** The Google's Gemini API is used for this program, which is free but comes with rate limits.
+
+**Challenge:** File loading (mainly for persistence) and ImageLoading (for GUI) often had repetitive lines of code which would bloat many files such as GUI components and StoryManager.
+- **Fix:** Utility classes such as FileUtils and ImageLoader were made in order to abstract repetitive code and expose only necessary functions and parameters to the rest of the program.
 
 ## Design Pattern Justifications
 ### MVC (Model-View-Controller)
